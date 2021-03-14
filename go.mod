@@ -1,4 +1,4 @@
-module GoRockGate
+module rockgate
 
 go 1.15
 
