@@ -7,29 +7,11 @@ import (
 	"github.com/tbalthazar/onesignal-go"
 	"log"
 	"net/http"
-	"rockgate/handlers"
 )
 
 var oneSignalService *OneSignalService
 
 var oneSignalApps *[]onesignal.App
-
-func HandlerServerStatus(responseWriter http.ResponseWriter, request *http.Request) {
-	// TODO: Check whether we are Ok or we can not create new Apps due to the lack of configuration data
-}
-
-func processOneSignal() {
-	client := onesignal.NewClient(nil)
-	// TODO: get the user key from the settings
-	client.UserKey = "OneSignalUserKey"
-	// Find an App
-	// Get an App Key by the domain name
-	// Config all certificates/keys/tokens from the settings
-	// Create an App if there is no App
-
-	// When we have a specific app:
-	client.AppKey = "YourOneSignalAppKey"
-}
 
 func main() {
 	// Configuring
@@ -49,18 +31,17 @@ func serve() {
 
 func setupRouter() {
 	router := mux.NewRouter()
-	router.HandleFunc("/push/{service:[a-z0-9]+}/send", handlers.HandlerPushNotifications)
+	router.HandleFunc("/push/{service:[a-z0-9]+}/send", HandlerPushNotifications)
 	router.HandleFunc("/status", HandlerServerStatus)
 	http.Handle("/", router)
 }
 
 func loadOneSignalApps() {
 	oneSignalService = NewOneSignalService(Config())
-	apps, _, err := oneSignalService.ListApps()
+	_, err := oneSignalService.LoadAppsList()
 	if err != nil {
 		fatal("[OneSignal::ListApps]" + err.Error())
 	}
-	oneSignalApps = &apps
 }
 
 func configure() {

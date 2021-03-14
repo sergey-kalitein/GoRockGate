@@ -38,7 +38,7 @@ func LoadConfiguration() ([]string, error) {
 		return []string{}, err
 	}
 
-	config := Configuration{}
+	config = &Configuration{}
 	err = v.Unmarshal(&config)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("[%s] %s", configFriendlyName, err.Error()))

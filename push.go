@@ -1,8 +1,9 @@
-package handlers
+package main
 
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
+	"github.com/tbalthazar/onesignal-go"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -38,7 +39,11 @@ func HandlerPushNotifications(responseWriter http.ResponseWriter, request *http.
 	contentType := request.Header.Get("Content-Type")
 	if contentType != "application/json" {
 		// TODO: cover with test
-		SendOutError(responseWriter, "Unsupported content type", http.StatusUnsupportedMediaType)
+		SendOutError(
+			responseWriter,
+			"Unsupported content type",
+			http.StatusUnsupportedMediaType,
+		)
 		return
 	}
 
@@ -48,9 +53,45 @@ func HandlerPushNotifications(responseWriter http.ResponseWriter, request *http.
 	err := json.Unmarshal(pushBodyText, pushPacket)
 	if err != nil {
 		// TODO: cover with test
-		SendOutError(responseWriter, "Unable to unmarshal incoming push: "+err.Error(), http.StatusBadRequest)
+		SendOutError(
+			responseWriter,
+			"Unable to unmarshal incoming push: "+err.Error(),
+			http.StatusBadRequest,
+		)
 		return
 	}
 
-	SendOutJSON(responseWriter, pushPacket, http.StatusOK)
+	notificationResponse, err := processOneSignalNotification(*pushPacket)
+	if err != nil {
+		SendOutError(
+			responseWriter,
+			"Unable to create notification: "+err.Error(),
+			http.StatusBadRequest,
+		)
+	} else {
+		SendOutJSON(responseWriter, notificationResponse, http.StatusOK)
+	}
+}
+
+func processOneSignalNotification(pushPacket RocketPushPacket) (*onesignal.NotificationCreateResponse, error) {
+	// Find an App
+	foundApp, err := oneSignalService.FindAppOrCreate(pushPacket.Options.SiteURL)
+	if err != nil {
+		return nil, err
+	}
+	// Get the App ID for further API calls
+	notificationRequest := &onesignal.NotificationRequest{}
+	notificationRequest.AppID = foundApp.ID
+	notificationRequest.Contents = map[string]string{"en": pushPacket.Options.Text}
+	// TODO: figure out which one to use
+	notificationRequest.IsAnyWeb = true
+	notificationRequest.IsIOS = true
+	notificationRequest.IsAndroid = true
+	notificationResponse, err := oneSignalService.SendNotification(notificationRequest)
+
+	if err != nil {
+		return nil, err
+	} else {
+		return notificationResponse, nil
+	}
 }
