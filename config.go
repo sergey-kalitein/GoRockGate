@@ -51,43 +51,33 @@ func LoadConfiguration() ([]string, error) {
 
 	if config.GCMKey == "" {
 		configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "GCMKey"))
-
 	}
 	if config.ChromeKey == "" {
 		configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "ChromeKey"))
-
 	}
 	if config.ChromeWebKey == "" {
 		configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "ChromeWebKey"))
-
 	}
 	if config.ChromeWebOrigin == "" {
 		configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "ChromeWebOrigin"))
-
 	}
 	if config.ChromeWebGCMSenderID == "" {
 		configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "ChromeWebGCMSenderID"))
-
 	}
 	if config.APNSEnv == "" {
 		configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "APNSEnv"))
-
 	}
 	if config.APNSP12 == "" {
 		configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "APNSP12"))
-
 	}
 	if config.APNSP12Password == "" {
 		configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "APNSP12Password"))
-
 	}
 	if config.SafariAPNSP12 == "" {
 		configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "SafariAPNSP12"))
-
 	}
 	if config.SafariAPNSP12Password == "" {
 		configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "SafariAPNSP12Password"))
-
 	}
 	// Errors must be at the very end
 	if config.OneSignalUserKey == "" {
