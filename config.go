@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/spf13/viper"
 )
@@ -8,16 +9,17 @@ import (
 // This configuration items must be defined in order to be able
 // to create new One Signal apps
 type Configuration struct {
-	GCMKey                string `json:"gcm_key,omitempty"`
-	ChromeKey             string `json:"chrome_key,omitempty"`
-	ChromeWebKey          string `json:"chrome_web_key,omitempty"`
-	ChromeWebOrigin       string `json:"chrome_web_origin,omitempty"`
-	ChromeWebGCMSenderID  string `json:"chrome_web_gcm_sender_id,omitempty"`
-	APNSEnv               string `json:"apns_env,omitempty"`
-	APNSP12               string `json:"apns_p12,omitempty"`
-	APNSP12Password       string `json:"apns_p12_password,omitempty"`
-	SafariAPNSP12         string `json:"safari_apns_p12,omitempty"`
-	SafariAPNSP12Password string `json:"safari_apns_p12_password,omitempty"`
+	OneSignalUserKey      string
+	GCMKey                string
+	ChromeKey             string
+	ChromeWebKey          string
+	ChromeWebOrigin       string
+	ChromeWebGCMSenderID  string
+	APNSEnv               string
+	APNSP12               string
+	APNSP12Password       string
+	SafariAPNSP12         string
+	SafariAPNSP12Password string
 }
 
 var config *Configuration
@@ -25,65 +27,72 @@ var config *Configuration
 var configWarnings []string
 
 func LoadConfiguration() ([]string, error) {
-	viper.SetConfigName("rockgate")
-	viper.SetConfigType("yaml")
-	err := viper.ReadInConfig()
+
+	configFriendlyName := "config/rockgate.yml"
+	v := viper.New()
+	v.SetConfigName("rockgate")
+	v.SetConfigType("yaml")
+	v.AddConfigPath("./conf")
+	err := v.ReadInConfig()
 	if err != nil {
 		return []string{}, err
 	}
 
-	config = &Configuration{
-		// Android
-		GCMKey: viper.GetString("GCMKey"),
-		// Chrome Web Push
-		ChromeKey:            viper.GetString("ChromeKey"),
-		ChromeWebKey:         viper.GetString("ChromeWebKey"),
-		ChromeWebOrigin:      viper.GetString("ChromeWebOrigin"),
-		ChromeWebGCMSenderID: viper.GetString("ChromeWebGCMSenderID"),
-		// Apple Push Notifications
-		APNSEnv:         viper.GetString("APNSEnv"),
-		APNSP12:         viper.GetString("APNSP12"),
-		APNSP12Password: viper.GetString("APNSP12Password"),
-		// Safari Web Push
-		SafariAPNSP12:         viper.GetString("SafariAPNSP12"),
-		SafariAPNSP12Password: viper.GetString("SafariAPNSP12Password"),
+	config := Configuration{}
+	err = v.Unmarshal(&config)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("[%s] %s", configFriendlyName, err.Error()))
 	}
 
 	if configWarnings == nil {
 		configWarnings = make([]string, 0)
 	}
-	errorTemplate := "'%s' configuration parameter is missing"
-	switch {
-	case config.GCMKey == "":
-		configWarnings = append(configWarnings, fmt.Sprintf(errorTemplate, "GCMKey"))
+	warningTemplate := "[" + configFriendlyName + "]" + " '%s' configuration parameter is missing"
 
-	case config.ChromeKey == "":
-		configWarnings = append(configWarnings, fmt.Sprintf(errorTemplate, "ChromeKey"))
+	if config.GCMKey == "" {
+		configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "GCMKey"))
 
-	case config.ChromeWebKey == "":
-		configWarnings = append(configWarnings, fmt.Sprintf(errorTemplate, "ChromeWebKey"))
+	}
+	if config.ChromeKey == "" {
+		configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "ChromeKey"))
 
-	case config.ChromeWebOrigin == "":
-		configWarnings = append(configWarnings, fmt.Sprintf(errorTemplate, "ChromeWebOrigin"))
+	}
+	if config.ChromeWebKey == "" {
+		configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "ChromeWebKey"))
 
-	case config.ChromeWebGCMSenderID == "":
-		configWarnings = append(configWarnings, fmt.Sprintf(errorTemplate, "ChromeWebGCMSenderID"))
+	}
+	if config.ChromeWebOrigin == "" {
+		configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "ChromeWebOrigin"))
 
-	case config.APNSEnv == "":
-		configWarnings = append(configWarnings, fmt.Sprintf(errorTemplate, "APNSEnv"))
+	}
+	if config.ChromeWebGCMSenderID == "" {
+		configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "ChromeWebGCMSenderID"))
 
-	case config.APNSP12 == "":
-		configWarnings = append(configWarnings, fmt.Sprintf(errorTemplate, "APNSP12"))
+	}
+	if config.APNSEnv == "" {
+		configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "APNSEnv"))
 
-	case config.APNSP12Password == "":
-		configWarnings = append(configWarnings, fmt.Sprintf(errorTemplate, "APNSP12Password"))
+	}
+	if config.APNSP12 == "" {
+		configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "APNSP12"))
 
-	case config.SafariAPNSP12 == "":
-		configWarnings = append(configWarnings, fmt.Sprintf(errorTemplate, "SafariAPNSP12"))
+	}
+	if config.APNSP12Password == "" {
+		configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "APNSP12Password"))
 
-	case config.SafariAPNSP12Password == "":
-		configWarnings = append(configWarnings, fmt.Sprintf(errorTemplate, "SafariAPNSP12Password"))
+	}
+	if config.SafariAPNSP12 == "" {
+		configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "SafariAPNSP12"))
 
+	}
+	if config.SafariAPNSP12Password == "" {
+		configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "SafariAPNSP12Password"))
+
+	}
+	// Errors must be at the very end
+	if config.OneSignalUserKey == "" {
+		return configWarnings, errors.New(fmt.Sprintf("[%s] the OneSignal User Key is undefined "+
+			"(see the 'OneSignalUserKey' config parameter)", configFriendlyName))
 	}
 
 	if len(configWarnings) > 0 {
