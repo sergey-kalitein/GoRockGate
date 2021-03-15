@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/fatih/color"
 	"log"
 	"net/http"
 )
@@ -26,6 +27,6 @@ func SendOutJSON(responseWriter http.ResponseWriter, payload interface{}, errorC
 }
 
 func SendOutError(w http.ResponseWriter, errorText string, errorCode int) {
-	log.Printf("[ERROR] %s \n", errorText)
+	log.Print(color.New(color.BgRed, color.FgHiYellow).Printf("[ERROR] %s \n", errorText))
 	SendOutJSON(w, ServiceError{ErrorText: errorText}, errorCode)
 }

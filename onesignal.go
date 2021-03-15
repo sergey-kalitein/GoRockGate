@@ -1,10 +1,19 @@
 package main
 
 import (
+	"encoding/json"
+	"github.com/fatih/color"
 	"github.com/tbalthazar/onesignal-go"
+	"log"
 	"net/http"
 	"regexp"
 	"strings"
+)
+
+const (
+	NotificationTypeAPN = "apn"
+	NotificationTypeGCM = "gcm"
+	NotificationTypeWeb = "web"
 )
 
 type AppsBySite map[string]onesignal.App
@@ -18,6 +27,7 @@ type OneSignalService struct {
 func NewOneSignalService(conf Configuration) *OneSignalService {
 	client := onesignal.NewClient(nil)
 	client.UserKey = conf.OneSignalUserKey
+	client.AppKey = conf.RestApiKey
 	return &OneSignalService{client: client, config: conf}
 }
 
@@ -64,7 +74,13 @@ func (o *OneSignalService) LoadAppsList() (AppsBySite, error) {
 	o.apps = make(AppsBySite, 0)
 	for _, app := range apps {
 		// `ChromeWebOrigin` is the only domain-related identity
-		o.apps[StripDomainName(app.ChromeWebOrigin)] = app
+		identity := app.ChromeWebOrigin
+		if identity == "" {
+			// All the apps created by this tool have the same name
+			// as the domain itself
+			identity = app.Name
+		}
+		o.apps[StripDomainName(identity)] = app
 	}
 
 	return o.apps, nil
@@ -81,29 +97,33 @@ func (o *OneSignalService) SetCurrentAppKey(appKey string) {
 // The new App is created based on the domain of origin.
 // All other settings are retrieved from the configuration.
 func (o *OneSignalService) CreateApp(domainOrigin string) (*onesignal.App, *http.Response, error) {
+	appName := StripDomainName(domainOrigin)
 	appRequest := &onesignal.AppRequest{
-		// TODO: implement the App Creation
-		Name:                             "",
-		GCMKey:                           "",
-		ChromeKey:                        "",
-		ChromeWebKey:                     "",
-		ChromeWebOrigin:                  "",
-		ChromeWebGCMSenderID:             "",
+		// TODO: add missing field values?
+		Name:                             appName,
+		GCMKey:                           o.config.GCMKey,
+		ChromeKey:                        o.config.ChromeKey,
+		ChromeWebKey:                     o.config.ChromeWebKey,
+		ChromeWebOrigin:                  domainOrigin,
+		ChromeWebGCMSenderID:             o.config.ChromeWebGCMSenderID,
 		ChromeWebDefaultNotificationIcon: "",
 		ChromeWebSubDomain:               "",
-		APNSEnv:                          "",
-		APNSP12:                          "",
-		APNSP12Password:                  "",
-		SafariAPNSP12:                    "",
-		SafariAPNSP12Password:            "",
-		SafariSiteOrigin:                 "",
-		SafariIcon1616:                   "",
-		SafariIcon3232:                   "",
-		SafariIcon6464:                   "",
-		SafariIcon128128:                 "",
-		SafariIcon256256:                 "",
-		SiteName:                         "",
+		APNSEnv:                          o.config.APNSEnv,
+		APNSP12:                          o.config.APNSP12,
+		APNSP12Password:                  o.config.APNSP12Password,
+		SafariAPNSP12:                    o.config.SafariAPNSP12,
+		SafariAPNSP12Password:            o.config.SafariAPNSP12Password,
+		SafariSiteOrigin:                 domainOrigin,
+		SafariIcon1616:                   "public/safari_packages/469c9b1c-86f2-43ec-98d5-35dd74c10f80/icons/16x16.png",
+		SafariIcon3232:                   "public/safari_packages/469c9b1c-86f2-43ec-98d5-35dd74c10f80/icons/16x16@2x.png",
+		SafariIcon6464:                   "public/safari_packages/469c9b1c-86f2-43ec-98d5-35dd74c10f80/icons/32x32@2x.png",
+		SafariIcon128128:                 "public/safari_packages/469c9b1c-86f2-43ec-98d5-35dd74c10f80/icons/128x128.png",
+		SafariIcon256256:                 "public/safari_packages/469c9b1c-86f2-43ec-98d5-35dd74c10f80/icons/128x128@2x.png",
+		SiteName:                         "'" + appName + "' website",
 	}
+	jsonText, _ := json.MarshalIndent(*appRequest, "", "    ")
+	log.Println(color.New(color.FgHiGreen).Sprintf("Creating a new app:\n %s", string(jsonText)))
+
 	return o.client.Apps.Create(appRequest)
 }
 

@@ -10,6 +10,7 @@ import (
 // to create new One Signal apps
 type Configuration struct {
 	OneSignalUserKey      string
+	RestApiKey            string
 	GCMKey                string
 	ChromeKey             string
 	ChromeWebKey          string
@@ -27,7 +28,6 @@ var config *Configuration
 var configWarnings []string
 
 func LoadConfiguration() ([]string, error) {
-
 	configFriendlyName := "config/rockgate.yml"
 	v := viper.New()
 	v.SetConfigName("rockgate")
@@ -44,6 +44,25 @@ func LoadConfiguration() ([]string, error) {
 		return nil, errors.New(fmt.Sprintf("[%s] %s", configFriendlyName, err.Error()))
 	}
 
+	configWarnings := collectConfigWarnings(configFriendlyName)
+	// Errors must be at the very end
+	if config.OneSignalUserKey == "" {
+		return configWarnings, errors.New(fmt.Sprintf("[%s] the OneSignal User Key is undefined "+
+			"(see the 'OneSignalUserKey' config parameter)", configFriendlyName))
+	}
+	if config.RestApiKey == "" {
+		return configWarnings, errors.New(fmt.Sprintf("[%s] the OneSignal REST API Key is undefined "+
+			"(see the 'RestApiKey' config parameter)", configFriendlyName))
+	}
+
+	if len(configWarnings) > 0 {
+		return configWarnings, nil
+	} else {
+		return []string{}, nil
+	}
+}
+
+func collectConfigWarnings(configFriendlyName string) []string {
 	if configWarnings == nil {
 		configWarnings = make([]string, 0)
 	}
@@ -58,9 +77,9 @@ func LoadConfiguration() ([]string, error) {
 	if config.ChromeWebKey == "" {
 		configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "ChromeWebKey"))
 	}
-	if config.ChromeWebOrigin == "" {
-		configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "ChromeWebOrigin"))
-	}
+	//if config.ChromeWebOrigin == "" {
+	//	configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "ChromeWebOrigin"))
+	//}
 	if config.ChromeWebGCMSenderID == "" {
 		configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "ChromeWebGCMSenderID"))
 	}
@@ -79,20 +98,8 @@ func LoadConfiguration() ([]string, error) {
 	if config.SafariAPNSP12Password == "" {
 		configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "SafariAPNSP12Password"))
 	}
-	// Errors must be at the very end
-	if config.OneSignalUserKey == "" {
-		return configWarnings, errors.New(fmt.Sprintf("[%s] the OneSignal User Key is undefined "+
-			"(see the 'OneSignalUserKey' config parameter)", configFriendlyName))
-	}
 
-	if len(configWarnings) > 0 {
-		return configWarnings, nil
-		//errors.New("inconsistent configuration, " +
-		//	"certain functions may be unavailable, " +
-		//	"e.g. OneSignal App Creation etc")
-	} else {
-		return []string{}, nil
-	}
+	return configWarnings
 }
 
 // Returns the Gateway configuration.

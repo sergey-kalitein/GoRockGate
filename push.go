@@ -39,11 +39,7 @@ func HandlerPushNotifications(responseWriter http.ResponseWriter, request *http.
 	contentType := request.Header.Get("Content-Type")
 	if contentType != "application/json" {
 		// TODO: cover with test
-		SendOutError(
-			responseWriter,
-			"Unsupported content type",
-			http.StatusUnsupportedMediaType,
-		)
+		SendOutError(responseWriter, "Unsupported content type", http.StatusUnsupportedMediaType)
 		return
 	}
 
@@ -53,21 +49,13 @@ func HandlerPushNotifications(responseWriter http.ResponseWriter, request *http.
 	err := json.Unmarshal(pushBodyText, pushPacket)
 	if err != nil {
 		// TODO: cover with test
-		SendOutError(
-			responseWriter,
-			"Unable to unmarshal incoming push: "+err.Error(),
-			http.StatusBadRequest,
-		)
+		SendOutError(responseWriter, "Unable to unmarshal incoming push: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	notificationResponse, err := processOneSignalNotification(*pushPacket)
 	if err != nil {
-		SendOutError(
-			responseWriter,
-			"Unable to create notification: "+err.Error(),
-			http.StatusBadRequest,
-		)
+		SendOutError(responseWriter, "Unable to create notification: "+err.Error(), http.StatusBadRequest)
 	} else {
 		SendOutJSON(responseWriter, notificationResponse, http.StatusOK)
 	}
