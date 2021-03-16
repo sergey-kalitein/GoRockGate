@@ -27,7 +27,7 @@ type OneSignalService struct {
 func NewOneSignalService(conf Configuration) *OneSignalService {
 	client := onesignal.NewClient(nil)
 	client.UserKey = conf.OneSignalUserKey
-	client.AppKey = conf.RestApiKey
+	// client.AppKey = conf.RestApiKey
 	return &OneSignalService{client: client, config: conf}
 }
 
@@ -35,6 +35,12 @@ func NewOneSignalService(conf Configuration) *OneSignalService {
 func StripDomainName(webOriginDomain string) string {
 	domainStripped := strings.TrimSpace(strings.ToLower(webOriginDomain))
 	return regexp.MustCompile(`^(?:http|https)://(.*?)`).ReplaceAllString(domainStripped, `$1`)
+}
+
+// The REST Auth Key must be set for every call related to an App.
+// See also the `BasicAuthKey` property of the `onesignal.App` struct.
+func (o *OneSignalService) SetAppRestAuthKey(appRestAuthKey string) {
+	o.client.AppKey = appRestAuthKey
 }
 
 func (o *OneSignalService) ListApps() ([]onesignal.App, *http.Response, error) {

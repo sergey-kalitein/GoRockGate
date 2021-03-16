@@ -71,10 +71,14 @@ func processOneSignalNotification(pushPacket RocketPushPacket) (*onesignal.Notif
 	notificationRequest := &onesignal.NotificationRequest{}
 	notificationRequest.AppID = foundApp.ID
 	notificationRequest.Contents = map[string]string{"en": pushPacket.Options.Text}
+	notificationRequest.Headings = map[string]string{"en": pushPacket.Options.Title}
 	// TODO: figure out which one to use
 	notificationRequest.IsAnyWeb = true
 	notificationRequest.IsIOS = true
 	notificationRequest.IsAndroid = true
+	notificationRequest.IncludedSegments = []string{"Active Users", "Inactive Users"}
+	// REST API key is used on per-app basis
+	oneSignalService.SetAppRestAuthKey(foundApp.BasicAuthKey)
 	notificationResponse, err := oneSignalService.SendNotification(notificationRequest)
 
 	if err != nil {

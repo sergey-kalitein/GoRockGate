@@ -12,6 +12,7 @@ type Configuration struct {
 	OneSignalUserKey      string
 	RestApiKey            string
 	GCMKey                string
+	AndroidGCMSenderID    string
 	ChromeKey             string
 	ChromeWebKey          string
 	ChromeWebOrigin       string
@@ -50,10 +51,6 @@ func LoadConfiguration() ([]string, error) {
 		return configWarnings, errors.New(fmt.Sprintf("[%s] the OneSignal User Key is undefined "+
 			"(see the 'OneSignalUserKey' config parameter)", configFriendlyName))
 	}
-	if config.RestApiKey == "" {
-		return configWarnings, errors.New(fmt.Sprintf("[%s] the OneSignal REST API Key is undefined "+
-			"(see the 'RestApiKey' config parameter)", configFriendlyName))
-	}
 
 	if len(configWarnings) > 0 {
 		return configWarnings, nil
@@ -71,8 +68,8 @@ func collectConfigWarnings(configFriendlyName string) []string {
 	if config.GCMKey == "" {
 		configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "GCMKey"))
 	}
-	if config.ChromeKey == "" {
-		configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "ChromeKey"))
+	if config.AndroidGCMSenderID == "" {
+		configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "AndroidGCMSenderID"))
 	}
 	if config.ChromeWebKey == "" {
 		configWarnings = append(configWarnings, fmt.Sprintf(warningTemplate, "ChromeWebKey"))
