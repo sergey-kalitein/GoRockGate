@@ -16,13 +16,13 @@ RUN go mod download
 ADD . .
 RUN go build -o /bin/rockgate
 
-FROM alpine
-RUN apk add --no-cache bash
-RUN apk add --no-cache ca-certificates
+# FROM alpine
+# RUN apk add --no-cache bash
+# RUN apk add --no-cache ca-certificates
 
-WORKDIR /bin/
+# WORKDIR /bin/
 
-COPY --from=builder /bin/rockgate .
+# COPY --from=builder /bin/rockgate .
 
 # Uncomment to run the binary in "production" mode:
 # ENV GO_ENV=production
@@ -32,4 +32,4 @@ ENV ADDR=0.0.0.0
 
 EXPOSE 8181
 
-CMD ["rockgate"]
+CMD ["/bin/rockgate"]

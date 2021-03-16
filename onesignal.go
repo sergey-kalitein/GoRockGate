@@ -58,8 +58,11 @@ func (o *OneSignalService) GetApps() (*AppsBySite, error) {
 }
 
 func (o *OneSignalService) FindAppOrCreate(webOriginDomain string) (*onesignal.App, error) {
-	app, isFound := o.apps[StripDomainName(webOriginDomain)]
+	appName := StripDomainName(webOriginDomain)
+	log.Printf("Finding App: '%s'\n", appName)
+	app, isFound := o.apps[appName]
 	if !isFound {
+		log.Print(color.New(color.BgYellow).Sprintf("[WARNING] App %s not found, creating a new one..\n", appName))
 		// Let's try to create an app if we are not able
 		// to find it in our app "registry"
 		createdApp, _, err := o.CreateApp(webOriginDomain)
@@ -67,6 +70,8 @@ func (o *OneSignalService) FindAppOrCreate(webOriginDomain string) (*onesignal.A
 			return nil, err
 		}
 		return createdApp, nil
+	} else {
+		log.Printf("App '%s' has been found\n", appName)
 	}
 	return &app, nil
 }
