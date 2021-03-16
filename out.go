@@ -19,10 +19,12 @@ type ServiceError struct {
 func SendOutJSON(responseWriter http.ResponseWriter, payload interface{}, errorCode int) {
 	responseWriter.Header().Set("Content-Type", ContentTypeJson)
 	responseWriter.WriteHeader(errorCode)
-	s, _ := json.Marshal(payload)
+	s, _ := json.MarshalIndent(payload, "", "  ")
 	_, err := fmt.Fprint(responseWriter, string(s))
 	if err != nil {
 		log.Printf("SendOutJSON: %s\n", err.Error())
+	} else {
+		log.Println(string(s))
 	}
 }
 
