@@ -6,10 +6,6 @@ ENV GOPROXY http://proxy.golang.org
 RUN mkdir -p /src/rockgate
 WORKDIR /src/rockgate
 
-# this will cache the npm install step, unless package.json changes
-# ADD package.json .
-# ADD yarn.lock .
-# RUN yarn install --no-progress
 # Copy the Go Modules manifests
 COPY go.mod go.mod
 COPY go.sum go.sum
@@ -18,7 +14,7 @@ COPY go.sum go.sum
 RUN go mod download
 
 ADD . .
-RUN go build -o /bin/app
+RUN go build -o /bin/rockgate
 
 FROM alpine
 RUN apk add --no-cache bash
@@ -26,7 +22,7 @@ RUN apk add --no-cache ca-certificates
 
 WORKDIR /bin/
 
-COPY --from=builder /bin/app .
+COPY --from=builder /bin/rockgate .
 
 # Uncomment to run the binary in "production" mode:
 # ENV GO_ENV=production
@@ -36,6 +32,4 @@ ENV ADDR=0.0.0.0
 
 EXPOSE 8181
 
-# Uncomment to run the migrations before running the binary:
-# CMD /bin/app migrate; /bin/app
-CMD exec /bin/app
+CMD ["rockgate"]
