@@ -28,6 +28,10 @@ var config *Configuration
 
 var configWarnings []string
 
+// Whether we need to log the incoming push messages
+// and the output response payload
+var IsLoggingPayloadEnabled bool
+
 func LoadConfiguration() ([]string, error) {
 	configFriendlyName := "config/rockgate.yml"
 	v := viper.New()
@@ -51,6 +55,7 @@ func LoadConfiguration() ([]string, error) {
 		return configWarnings, errors.New(fmt.Sprintf("[%s] the OneSignal User Key is undefined "+
 			"(see the 'OneSignalUserKey' config parameter)", configFriendlyName))
 	}
+	IsLoggingPayloadEnabled = v.GetBool("LoggingPayloadEnabled")
 
 	if len(configWarnings) > 0 {
 		return configWarnings, nil

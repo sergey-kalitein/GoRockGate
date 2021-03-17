@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/fatih/color"
 	"github.com/gorilla/mux"
 	"github.com/tbalthazar/onesignal-go"
 	"io/ioutil"
@@ -51,6 +52,10 @@ func HandlerPushNotifications(responseWriter http.ResponseWriter, request *http.
 		// TODO: cover with test
 		SendOutError(responseWriter, "Unable to unmarshal incoming push: "+err.Error(), http.StatusBadRequest)
 		return
+	} else {
+		if IsLoggingPayloadEnabled == true {
+			log.Print(color.New(color.FgHiBlue).Printf("Incoming push message body:\n %s\n", pushBodyText))
+		}
 	}
 
 	notificationResponse, err := processOneSignalNotification(*pushPacket)
