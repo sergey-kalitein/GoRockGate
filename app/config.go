@@ -8,23 +8,21 @@ import (
 	"rockgate/models"
 )
 
+const (
+	EnvironmentPrefix = "RG"
+	ConfigName        = "rockgate"
+	ConfigType        = "yaml"
+	DefaultConfigPath = "./conf"
+)
+
 var config *models.Configuration
 
 var configWarnings []string
 
-// Whether we need to log the incoming push messages
-// and the output response payload
-func IsLoggingPayloadEnabled() bool {
-	return viper.GetBool("LOG_PAYLOAD_ENABLED")
-}
-
 func LoadConfiguration() ([]string, error) {
 	configFriendlyName := "config/rockgate.yml"
-	viper.AutomaticEnv()
-	viper.SetConfigName("rockgate")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath("./conf")
-	err := viper.ReadInConfig()
+
+	err := viperReadConfig()
 	if err != nil {
 		return []string{}, err
 	}
@@ -47,6 +45,16 @@ func LoadConfiguration() ([]string, error) {
 	} else {
 		return []string{}, nil
 	}
+}
+
+func viperReadConfig() error {
+	viper.AutomaticEnv()
+	viper.SetEnvPrefix(EnvironmentPrefix)
+	viper.SetConfigName(ConfigName)
+	viper.SetConfigType(ConfigType)
+	viper.AddConfigPath(DefaultConfigPath)
+	err := viper.ReadInConfig()
+	return err
 }
 
 func collectConfigWarnings(configFriendlyName string) []string {
@@ -117,4 +125,10 @@ func Configure() {
 			fmt.Println()
 		}
 	}
+}
+
+// Whether we need to log the incoming push messages
+// and the output response payload?
+func IsLoggingPayloadEnabled() bool {
+	return viper.GetBool("LOG_PAYLOAD_ENABLED")
 }
