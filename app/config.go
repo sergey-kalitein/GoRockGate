@@ -3,6 +3,7 @@ package app
 import (
 	"errors"
 	"fmt"
+	"github.com/fatih/color"
 	"github.com/spf13/viper"
 	"rockgate/models"
 )
@@ -103,4 +104,17 @@ func ConfigWarnings() []string {
 		LoadConfiguration()
 	}
 	return configWarnings
+}
+
+func Configure() {
+	configWarnings, err := LoadConfiguration()
+	if err != nil {
+		Fatal(err.Error())
+	}
+	if len(configWarnings) > 0 {
+		for _, warningText := range configWarnings {
+			color.New(color.FgBlack, color.BgYellow).Printf("[CONFIG WARNING] %s", warningText)
+			fmt.Println()
+		}
+	}
 }

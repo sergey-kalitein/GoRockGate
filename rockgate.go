@@ -2,9 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/fatih/color"
 	"github.com/gorilla/mux"
-	_ "github.com/joho/godotenv/autoload"
+	_ "github.com/joho/godotenv/autoload" // for the main ".env" file
 	"net/http"
 	"os"
 	"rockgate/app"
@@ -13,22 +12,13 @@ import (
 
 func main() {
 	// Configuring
-	configure()
+	app.Configure()
 	// Init all services
 	app.InitServices()
 	// Setting up the routing
 	setupRouter()
 	// Launching the server
 	serve()
-}
-
-func serve() {
-	fmt.Println("Push Gateway is listening...")
-	gatewayAddress := os.Getenv("SERVICE_ADDRESS")
-	if gatewayAddress == "" {
-		gatewayAddress = ":8181"
-	}
-	http.ListenAndServe(gatewayAddress, nil)
 }
 
 func setupRouter() {
@@ -40,15 +30,11 @@ func setupRouter() {
 	http.Handle("/", router)
 }
 
-func configure() {
-	configWarnings, err := app.LoadConfiguration()
-	if err != nil {
-		app.Fatal(err.Error())
+func serve() {
+	fmt.Println("Push Gateway is listening...")
+	gatewayAddress := os.Getenv("SERVICE_ADDRESS")
+	if gatewayAddress == "" {
+		gatewayAddress = ":8181"
 	}
-	if len(configWarnings) > 0 {
-		for _, warningText := range configWarnings {
-			color.New(color.FgBlack, color.BgYellow).Printf("[CONFIG WARNING] %s", warningText)
-			fmt.Println()
-		}
-	}
+	http.ListenAndServe(gatewayAddress, nil)
 }
