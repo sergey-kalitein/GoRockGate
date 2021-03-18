@@ -1,4 +1,4 @@
-package main
+package controllers
 
 import (
 	"encoding/json"
@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"rockgate/app"
 )
 
 type RocketPushPacket struct {
@@ -40,7 +41,7 @@ func HandlerPushNotifications(responseWriter http.ResponseWriter, request *http.
 	contentType := request.Header.Get("Content-Type")
 	if contentType != "application/json" {
 		// TODO: cover with test
-		SendOutError(responseWriter, "Unsupported content type", http.StatusUnsupportedMediaType)
+		app.SendOutError(responseWriter, "Unsupported content type", http.StatusUnsupportedMediaType)
 		return
 	}
 
@@ -50,25 +51,25 @@ func HandlerPushNotifications(responseWriter http.ResponseWriter, request *http.
 	err := json.Unmarshal(pushBodyText, pushPacket)
 	if err != nil {
 		// TODO: cover with test
-		SendOutError(responseWriter, "Unable to unmarshal incoming push: "+err.Error(), http.StatusBadRequest)
+		app.SendOutError(responseWriter, "Unable to unmarshal incoming push: "+err.Error(), http.StatusBadRequest)
 		return
 	} else {
-		if IsLoggingPayloadEnabled() == true {
+		if app.IsLoggingPayloadEnabled() == true {
 			log.Print(color.New(color.FgHiBlue).Printf("Incoming push message body:\n %s\n", pushBodyText))
 		}
 	}
 
 	notificationResponse, err := processOneSignalNotification(*pushPacket)
 	if err != nil {
-		SendOutError(responseWriter, "Unable to create notification: "+err.Error(), http.StatusBadRequest)
+		app.SendOutError(responseWriter, "Unable to create notification: "+err.Error(), http.StatusBadRequest)
 	} else {
-		SendOutJSON(responseWriter, notificationResponse, http.StatusOK)
+		app.SendOutJSON(responseWriter, notificationResponse, http.StatusOK)
 	}
 }
 
 func processOneSignalNotification(pushPacket RocketPushPacket) (*onesignal.NotificationCreateResponse, error) {
 	// Find an App
-	foundApp, err := oneSignalService.FindAppOrCreate(pushPacket.Options.SiteURL)
+	foundApp, err := app.OneSignalService.FindAppOrCreate(pushPacket.Options.SiteURL)
 	if err != nil {
 		return nil, err
 	}
@@ -83,8 +84,8 @@ func processOneSignalNotification(pushPacket RocketPushPacket) (*onesignal.Notif
 	notificationRequest.IsAndroid = true
 	notificationRequest.IncludedSegments = []string{"Active Users", "Inactive Users"}
 	// REST API key is used on per-app basis
-	oneSignalService.SetAppRestAuthKey(foundApp.BasicAuthKey)
-	notificationResponse, err := oneSignalService.SendNotification(notificationRequest)
+	app.OneSignalService.SetAppRestAuthKey(foundApp.BasicAuthKey)
+	notificationResponse, err := app.OneSignalService.SendNotification(notificationRequest)
 
 	if err != nil {
 		return nil, err

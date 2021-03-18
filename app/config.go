@@ -1,30 +1,13 @@
-package main
+package app
 
 import (
 	"errors"
 	"fmt"
 	"github.com/spf13/viper"
+	"rockgate/models"
 )
 
-// This configuration items must be defined in order to be able
-// to create new One Signal apps
-type Configuration struct {
-	OneSignalUserKey      string
-	RestApiKey            string
-	GCMKey                string
-	AndroidGCMSenderID    string
-	ChromeKey             string
-	ChromeWebKey          string
-	ChromeWebOrigin       string
-	ChromeWebGCMSenderID  string
-	APNSEnv               string
-	APNSP12               string
-	APNSP12Password       string
-	SafariAPNSP12         string
-	SafariAPNSP12Password string
-}
-
-var config *Configuration
+var config *models.Configuration
 
 var configWarnings []string
 
@@ -45,7 +28,7 @@ func LoadConfiguration() ([]string, error) {
 		return []string{}, err
 	}
 
-	config = &Configuration{}
+	config = &models.Configuration{}
 	err = viper.Unmarshal(&config)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("[%s] %s", configFriendlyName, err.Error()))
@@ -57,7 +40,6 @@ func LoadConfiguration() ([]string, error) {
 		return configWarnings, errors.New(fmt.Sprintf("[%s] the OneSignal User Key is undefined "+
 			"(see the 'OneSignalUserKey' config parameter)", configFriendlyName))
 	}
-	//IsLoggingPayloadEnabled = v.GetBool("LoggingPayloadEnabled")
 
 	if len(configWarnings) > 0 {
 		return configWarnings, nil
@@ -109,7 +91,7 @@ func collectConfigWarnings(configFriendlyName string) []string {
 // Returns the Gateway configuration.
 // If any of these parameters are undefined then certain functions of the gateway
 // may NOT work properly, let's say creation of new Apps etc.
-func Config() Configuration {
+func Config() models.Configuration {
 	if config == nil {
 		LoadConfiguration()
 	}

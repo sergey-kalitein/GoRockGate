@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"encoding/json"
@@ -33,4 +33,9 @@ func SendOutJSON(responseWriter http.ResponseWriter, payload interface{}, errorC
 func SendOutError(w http.ResponseWriter, errorText string, errorCode int) {
 	log.Print(color.New(color.BgRed, color.FgHiYellow).Printf("[ERROR] %s \n", errorText))
 	SendOutJSON(w, ServiceError{ErrorText: errorText}, errorCode)
+}
+
+func Fatal(errorText string) {
+	color.New()
+	log.Fatal(color.New(color.BgRed, color.FgHiYellow).Sprintf("[FATAL ERROR] %s", errorText))
 }

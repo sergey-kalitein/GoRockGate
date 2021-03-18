@@ -4,20 +4,18 @@ import (
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/gorilla/mux"
-	"github.com/tbalthazar/onesignal-go"
-	"log"
+	_ "github.com/joho/godotenv/autoload"
 	"net/http"
+	"os"
+	"rockgate/app"
+	"rockgate/controllers"
 )
-
-var oneSignalService *OneSignalService
-
-var oneSignalApps *[]onesignal.App
 
 func main() {
 	// Configuring
 	configure()
-	// Load Applications
-	loadOneSignalApps()
+	// Init all services
+	app.InitServices()
 	// Setting up the routing
 	setupRouter()
 	// Launching the server
@@ -26,28 +24,26 @@ func main() {
 
 func serve() {
 	fmt.Println("Push Gateway is listening...")
-	http.ListenAndServe(":8181", nil)
+	gatewayAddress := os.Getenv("SERVICE_ADDRESS")
+	if gatewayAddress == "" {
+		gatewayAddress = ":8181"
+	}
+	http.ListenAndServe(gatewayAddress, nil)
 }
 
 func setupRouter() {
 	router := mux.NewRouter()
-	router.HandleFunc("/push/{service:[a-z0-9]+}/send", HandlerPushNotifications)
+	router.HandleFunc("/push/{service:[a-z0-9]+}/send", controllers.HandlerPushNotifications)
+	router.HandleFunc("/apps/find-or-create/{domain:[^/]+}", controllers.FindOrCreateApplication)
+	router.HandleFunc("/apps/list", controllers.ListApplications)
 	router.HandleFunc("/status", HandlerServerStatus)
 	http.Handle("/", router)
 }
 
-func loadOneSignalApps() {
-	oneSignalService = NewOneSignalService(Config())
-	_, err := oneSignalService.LoadAppsList()
-	if err != nil {
-		fatal("[OneSignal::ListApps]" + err.Error())
-	}
-}
-
 func configure() {
-	configWarnings, err := LoadConfiguration()
+	configWarnings, err := app.LoadConfiguration()
 	if err != nil {
-		fatal(err.Error())
+		app.Fatal(err.Error())
 	}
 	if len(configWarnings) > 0 {
 		for _, warningText := range configWarnings {
@@ -55,9 +51,4 @@ func configure() {
 			fmt.Println()
 		}
 	}
-}
-
-func fatal(errorText string) {
-	color.New()
-	log.Fatal(color.New(color.BgRed, color.FgHiYellow).Sprintf("[FATAL ERROR] %s", errorText))
 }

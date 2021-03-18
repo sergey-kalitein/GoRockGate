@@ -1,4 +1,4 @@
-package main
+package models
 
 import (
 	"encoding/json"
@@ -27,7 +27,6 @@ type OneSignalService struct {
 func NewOneSignalService(conf Configuration) *OneSignalService {
 	client := onesignal.NewClient(nil)
 	client.UserKey = conf.OneSignalUserKey
-	// client.AppKey = conf.RestApiKey
 	return &OneSignalService{client: client, config: conf}
 }
 
