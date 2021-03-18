@@ -24,7 +24,7 @@ func SendOutJSON(responseWriter http.ResponseWriter, payload interface{}, errorC
 	if err != nil {
 		log.Printf("SendOutJSON: %s\n", err.Error())
 	} else {
-		if IsLoggingPayloadEnabled == true {
+		if IsLoggingPayloadEnabled() == true {
 			log.Println(color.New(color.FgHiBlue).Sprint(string(s)))
 		}
 	}

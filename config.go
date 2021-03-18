@@ -30,21 +30,23 @@ var configWarnings []string
 
 // Whether we need to log the incoming push messages
 // and the output response payload
-var IsLoggingPayloadEnabled bool
+func IsLoggingPayloadEnabled() bool {
+	return viper.GetBool("LOG_PAYLOAD_ENABLED")
+}
 
 func LoadConfiguration() ([]string, error) {
 	configFriendlyName := "config/rockgate.yml"
-	v := viper.New()
-	v.SetConfigName("rockgate")
-	v.SetConfigType("yaml")
-	v.AddConfigPath("./conf")
-	err := v.ReadInConfig()
+	viper.AutomaticEnv()
+	viper.SetConfigName("rockgate")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath("./conf")
+	err := viper.ReadInConfig()
 	if err != nil {
 		return []string{}, err
 	}
 
 	config = &Configuration{}
-	err = v.Unmarshal(&config)
+	err = viper.Unmarshal(&config)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("[%s] %s", configFriendlyName, err.Error()))
 	}
@@ -55,7 +57,7 @@ func LoadConfiguration() ([]string, error) {
 		return configWarnings, errors.New(fmt.Sprintf("[%s] the OneSignal User Key is undefined "+
 			"(see the 'OneSignalUserKey' config parameter)", configFriendlyName))
 	}
-	IsLoggingPayloadEnabled = v.GetBool("LoggingPayloadEnabled")
+	//IsLoggingPayloadEnabled = v.GetBool("LoggingPayloadEnabled")
 
 	if len(configWarnings) > 0 {
 		return configWarnings, nil

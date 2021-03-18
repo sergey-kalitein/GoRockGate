@@ -135,6 +135,7 @@ func (o *OneSignalService) CreateApp(domainOrigin string) (*onesignal.App, *http
 	jsonText, _ := json.MarshalIndent(*appRequest, "", "    ")
 	log.Println(color.New(color.FgHiGreen).Sprintf("Creating a new app:\n %s", string(jsonText)))
 
+	// TODO: implement direct API call to pass the `Android App ID`
 	return o.client.Apps.Create(appRequest)
 }
 

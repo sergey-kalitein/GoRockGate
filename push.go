@@ -53,7 +53,7 @@ func HandlerPushNotifications(responseWriter http.ResponseWriter, request *http.
 		SendOutError(responseWriter, "Unable to unmarshal incoming push: "+err.Error(), http.StatusBadRequest)
 		return
 	} else {
-		if IsLoggingPayloadEnabled == true {
+		if IsLoggingPayloadEnabled() == true {
 			log.Print(color.New(color.FgHiBlue).Printf("Incoming push message body:\n %s\n", pushBodyText))
 		}
 	}
