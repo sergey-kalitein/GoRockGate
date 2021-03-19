@@ -39,18 +39,21 @@ SafariAPNSP12Password:            "your-safari-P12-secret-password"
 ## API Endpoints
 
 Available Endpoints:
-* [List Apps](#list-apps)
-* [Find (Get) App by Domain](#find-app-by-domain)
-* [Get App (or Create)](#get-app-or-create)
-* [Push Message](#push-message)
+- [List Apps](#list-apps)
+  
+- [Find (Get) App by Domain](#find-app-by-domain)
+  
+- [Get App (or Create)](#get-app-or-create)
+  
+- [Push Message](#push-message)
 
 
 ### List Apps
 
 
-**HTTP Method:** `GET`
+- **HTTP Method:** `GET`
 
-Endpoint Pattern: `/apps/list`
+- Endpoint Pattern: `/apps/list`
 
 **HTTP Status:** `200 Ok`
 
@@ -125,11 +128,11 @@ Endpoint Pattern: `/apps/list`
 
 ### Find App by Domain
 
-* **HTTP Method:** `GET`
+- **HTTP Method:** `GET`
 
-* Endpoint Pattern: `/apps/find/{domain:[^/]+}`
+- Endpoint Pattern: `/apps/find/{domain:[^/]+}`
 
-* Endpoint Example: `/apps/find/sg.workspee.chat`
+- Endpoint Example: `/apps/find/sg.workspee.chat`
 
 
 **HTTP Status:** `200 Ok` 
@@ -178,11 +181,11 @@ Endpoint Pattern: `/apps/list`
 
 ### Get App (or Create)
 
-* **HTTP Method:** `GET`
+- **HTTP Method:** `GET`
 
-* Endpoint Pattern: `/apps/find-or-create/{domain:[^/]+}`
+- Endpoint Pattern: `/apps/find-or-create/{domain:[^/]+}`
 
-* Endpoint Example: `/apps/find/my.new.beautiful.chat`
+- Endpoint Example: `/apps/find/my.new.beautiful.chat`
 
 
 **HTTP Status:** `200 Ok`
@@ -228,8 +231,6 @@ Endpoint Pattern: `/apps/list`
 }
 ```
 
----------
-
 
 ### Push Message
 
@@ -241,8 +242,9 @@ These Endpoints are requested internally by the Rocket Chat instance:
 > 
 > `/push/web/send`
 
-* **HTTP Method** `POST` 
-* HTTP POST Body Payload Example:
+- **HTTP Method** `POST` 
+  
+- HTTP POST Body Payload Example:
 
 ```json
 {
