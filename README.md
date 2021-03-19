@@ -38,16 +38,6 @@ SafariAPNSP12Password:            "your-safari-P12-secret-password"
 
 ## API Endpoints
 
-Available Endpoints:
-
-- [List Apps](#list-apps)
-  
-- [Find (Get) App by Domain](#find-app-by-domain)
-  
-- [Get App (or Create)](#get-app-or-create)
-  
-- [Push Message](#push-message)
-
 
 ### List Apps
 

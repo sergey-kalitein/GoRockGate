@@ -27,7 +27,6 @@ func setupRouter() {
 	router.HandleFunc("/apps/find-or-create/{domain:[^/]+}", controllers.FindOrCreateApplication)
 	router.HandleFunc("/apps/find/{domain:[^/]+}", controllers.FindApplication)
 	router.HandleFunc("/apps/list", controllers.ListApplications)
-	router.HandleFunc("/status", HandlerServerStatus)
 	http.Handle("/", router)
 }
 
