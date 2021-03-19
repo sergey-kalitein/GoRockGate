@@ -1,7 +1,7 @@
 # RockGate
-## The RocketChat to OneSignal Gateway
+> **The RocketChat to OneSignal Gateway**
 
-### Configuring
+## Configuring
 
 The configuration file path:
 
@@ -29,22 +29,21 @@ SafariAPNSP12Password:            "your-safari-P12-secret-password"
 ```
 
 
-### Building
+## Building
 
 
 `docker build -t sergey-kalitein/gorockgate:0.1 .`
 
 `docker run -d -p 8181:8181 --name go-rock-gate sergey-kalitein/gorockgate:0.1 && docker attach go-rock-gate`
 
-### API Endpoints
+## API Endpoints
 
 Usual gateway URL may look like this:
 
 > `https://your.server.gateway:8181`
 
-----------
 
-#### List Apps
+### List Apps
 
 
 **HTTP Method:** `GET`
@@ -121,9 +120,8 @@ Endpoint Pattern: `/apps/list`
 }
 ```
 
--------------
 
-#### Find App by Domain
+### Find App by Domain
 
 * **HTTP Method:** `GET`
 
@@ -175,9 +173,8 @@ Endpoint Pattern: `/apps/list`
 }
 ```
 
----------
 
-#### Get App (or Create)
+### Get App (or Create)
 
 * **HTTP Method:** `GET`
 
@@ -232,7 +229,7 @@ Endpoint Pattern: `/apps/list`
 ---------
 
 
-#### Push Message
+### Push Message
 
 These Endpoints are requested internally by the Rocket Chat instance:
 
@@ -242,7 +239,8 @@ These Endpoints are requested internally by the Rocket Chat instance:
 > 
 > `/push/web/send`
 
-HTTP POST Body Example of a Push Notification:
+* **HTTP Method** `POST` 
+* HTTP POST Body Payload Example:
 
 ```json
 {
@@ -264,5 +262,18 @@ HTTP POST Body Example of a Push Notification:
     "topic": "com.app.your-domain.chat",
     "uniqueId": "no33sYn6N2fb8JNXm"
   }
+}
+```
+
+**HTTP Status:** `200 Ok`
+
+**HTTP Response Example:**
+```json
+{
+    "id": "",
+    "recipients": 0,
+    "errors": [
+        "All included players are not subscribed"
+    ]
 }
 ```
