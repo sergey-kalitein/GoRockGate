@@ -9,30 +9,10 @@ import (
 	"log"
 	"net/http"
 	"rockgate/app"
+	"rockgate/models"
 )
 
-type RocketPushPacket struct {
-	Token   string `json:"token"`
-	Options struct {
-		CreatedAt string `json:"createdAt"` //"2021-03-12T10:09:17.925Z",
-		CreatedBy string `json:"createdBy"` // <SERVER>
-		Sent      bool   `json:"sent"`      // false
-		Sending   int    `json:"sending"`   // 0
-		From      string `json:"from"`      // "push"
-		Title     string `json:"title"`     // "@sg"
-		Text      string `json:"text"`      // "This is a push test message"
-		UserId    string `json:"userId"`    // "gR6Hhq5aEDdGswSQY",
-		Sound     string `json:"sound"`     // "default",
-		Apn       struct {
-			Text string `json:"text"` // "@sg:\nThis is a push test message"
-		} `json:"apn"`
-		SiteURL  string `json:"site_url"` // "https://sg.workspee.chat"
-		Topic    string `json:"topic"`    // "com.app.collaborative.chat",
-		UniqueId string `json:"uniqueId"` // "no33sYn6N2fb8JNXm"
-	} `json:"options"`
-}
-
-func HandlerPushNotifications(responseWriter http.ResponseWriter, request *http.Request) {
+func SendPushNotification(responseWriter http.ResponseWriter, request *http.Request) {
 	vars := mux.Vars(request)
 	serviceId := vars["service"]
 	log.Printf("Target Push Service ID: %s", serviceId)
@@ -46,7 +26,7 @@ func HandlerPushNotifications(responseWriter http.ResponseWriter, request *http.
 	}
 
 	// Parsing the incoming Push Notification
-	pushPacket := &RocketPushPacket{}
+	pushPacket := &models.RocketPushPacket{}
 	pushBodyText, _ := ioutil.ReadAll(request.Body)
 	err := json.Unmarshal(pushBodyText, pushPacket)
 	if err != nil {
@@ -67,9 +47,9 @@ func HandlerPushNotifications(responseWriter http.ResponseWriter, request *http.
 	}
 }
 
-func processOneSignalNotification(pushPacket RocketPushPacket) (*onesignal.NotificationCreateResponse, error) {
+func processOneSignalNotification(pushPacket models.RocketPushPacket) (*onesignal.NotificationCreateResponse, error) {
 	// Find an App
-	foundApp, err := app.OneSignalService.FindAppOrCreate(pushPacket.Options.SiteURL)
+	foundApp, err := app.Services.OneSignalService.FindAppOrCreate(pushPacket.Options.SiteURL)
 	if err != nil {
 		return nil, err
 	}
@@ -84,8 +64,8 @@ func processOneSignalNotification(pushPacket RocketPushPacket) (*onesignal.Notif
 	notificationRequest.IsAndroid = true
 	notificationRequest.IncludedSegments = []string{"Active Users", "Inactive Users"}
 	// REST API key is used on per-app basis
-	app.OneSignalService.SetAppRestAuthKey(foundApp.BasicAuthKey)
-	notificationResponse, err := app.OneSignalService.SendNotification(notificationRequest)
+	app.Services.OneSignalService.SetAppRestAuthKey(foundApp.BasicAuthKey)
+	notificationResponse, err := app.Services.OneSignalService.SendNotification(notificationRequest)
 
 	if err != nil {
 		return nil, err

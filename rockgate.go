@@ -23,8 +23,9 @@ func main() {
 
 func setupRouter() {
 	router := mux.NewRouter()
-	router.HandleFunc("/push/{service:[a-z0-9]+}/send", controllers.HandlerPushNotifications)
+	router.HandleFunc("/push/{service:[a-z0-9]+}/send", controllers.SendPushNotification)
 	router.HandleFunc("/apps/find-or-create/{domain:[^/]+}", controllers.FindOrCreateApplication)
+	router.HandleFunc("/apps/find/{domain:[^/]+}", controllers.FindApplication)
 	router.HandleFunc("/apps/list", controllers.ListApplications)
 	router.HandleFunc("/status", HandlerServerStatus)
 	http.Handle("/", router)

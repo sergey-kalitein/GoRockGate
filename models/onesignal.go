@@ -6,8 +6,7 @@ import (
 	"github.com/tbalthazar/onesignal-go"
 	"log"
 	"net/http"
-	"regexp"
-	"strings"
+	"rockgate/helpers"
 )
 
 const (
@@ -28,12 +27,6 @@ func NewOneSignalService(conf Configuration) *OneSignalService {
 	client := onesignal.NewClient(nil)
 	client.UserKey = conf.OneSignalUserKey
 	return &OneSignalService{client: client, config: conf}
-}
-
-// Strips protocol from the domain name
-func StripDomainName(webOriginDomain string) string {
-	domainStripped := strings.TrimSpace(strings.ToLower(webOriginDomain))
-	return regexp.MustCompile(`^(?:http|https)://(.*?)`).ReplaceAllString(domainStripped, `$1`)
 }
 
 // The REST Auth Key must be set for every call related to an App.
@@ -57,9 +50,8 @@ func (o *OneSignalService) GetApps() (*AppsBySite, error) {
 }
 
 func (o *OneSignalService) FindAppOrCreate(webOriginDomain string) (*onesignal.App, error) {
-	appName := StripDomainName(webOriginDomain)
-	log.Printf("Finding App: '%s'\n", appName)
-	app, isFound := o.apps[appName]
+	appName := helpers.StripDomainName(webOriginDomain)
+	app, isFound := o.FindApp(appName)
 	if !isFound {
 		log.Print(color.New(color.BgYellow).Sprintf("[WARNING] App %s not found, creating a new one..\n", appName))
 		// Let's try to create an app if we are not able
@@ -73,6 +65,12 @@ func (o *OneSignalService) FindAppOrCreate(webOriginDomain string) (*onesignal.A
 		log.Printf("App '%s' has been found\n", appName)
 	}
 	return &app, nil
+}
+
+func (o *OneSignalService) FindApp(appName string) (onesignal.App, bool) {
+	log.Printf("Finding App: '%s'\n", appName)
+	app, isFound := o.apps[appName]
+	return app, isFound
 }
 
 // Loads a list of available OneSignal apps
@@ -90,7 +88,7 @@ func (o *OneSignalService) LoadAppsList() (AppsBySite, error) {
 			// as the domain itself
 			identity = app.Name
 		}
-		o.apps[StripDomainName(identity)] = app
+		o.apps[helpers.StripDomainName(identity)] = app
 	}
 
 	return o.apps, nil
@@ -107,7 +105,7 @@ func (o *OneSignalService) SetCurrentAppKey(appKey string) {
 // The new App is created based on the domain of origin.
 // All other settings are retrieved from the configuration.
 func (o *OneSignalService) CreateApp(domainOrigin string) (*onesignal.App, *http.Response, error) {
-	appName := StripDomainName(domainOrigin)
+	appName := helpers.StripDomainName(domainOrigin)
 	appRequest := &onesignal.AppRequest{
 		// TODO: add missing field values?
 		Name:                             appName,

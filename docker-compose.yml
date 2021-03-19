@@ -1,0 +1,37 @@
+version: '3.7'
+services:
+  qrstats__mysql_db:
+    image: 'mysql:8'
+    container_name: qrstats__mysql_db
+    restart: always
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    volumes:
+      - './mysql/dbdata:/var/lib/mysql'
+      - './mysql/conf:/etc/mysql/conf.d'
+      - './mysql/dump:/data'
+      - './mysql/init:/docker-entrypoint-initdb.d'
+    env_file:
+      - ./mysql/.env
+    networks:
+      - qrstats-network
+  qrstats__web_service:
+    build: ./qrstats
+    container_name: qrstats__web_service
+    restart: always
+    ports:
+      - '3080:3000'
+    volumes:
+      - './www:/var/www'
+    networks:
+      - qrstats-network
+networks:
+  qrstats-network:
+    name: qrstats-network
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.215.0/28
