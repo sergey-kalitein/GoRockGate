@@ -38,9 +38,11 @@ SafariAPNSP12Password:            "your-safari-P12-secret-password"
 
 ## API Endpoints
 
-Usual gateway URL may look like this:
-
-> `https://your.server.gateway:8181`
+Available Endpoints:
+* [List Apps](#list-apps)
+* [Find (Get) App by Domain](#find-app-by-domain)
+* [Get App (or Create)](#get-app-or-create)
+* [Push Message](#push-message)
 
 
 ### List Apps
